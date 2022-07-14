@@ -11,6 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -23,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.plcoding.cleanarchitecturenoteapp.feature_note.domain.model.Note
 import com.plcoding.cleanarchitecturenoteapp.feature_note.presentation.add_edit_notes.components.TransparentHintTextField
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -42,6 +44,19 @@ fun AddEditNoteScreen(
         )
     }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when(event) {
+                is AddEditNoteViewModel.UIEvent.ShowSnackBar -> {
+                    scaffoldState.snackbarHostState.showSnackbar(event.message)
+                }
+                is AddEditNoteViewModel.UIEvent.SaveNote -> {
+                    navController.navigateUp()
+                }
+            }
+        }
+    }
 
     Scaffold(
         floatingActionButton = {
@@ -127,7 +142,7 @@ fun AddEditNoteScreen(
                 },
                 isHintVisible = contentState.isHintVisible,
                 textStyle = MaterialTheme.typography.body1,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxHeight()
             )
         }
     }
